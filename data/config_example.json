@@ -1,0 +1,29 @@
+{
+    "active": 0,
+    "screens": [
+        {
+            "bmp": "/bmp/example.bmp",
+            "title": "title0",
+            "text": [
+                "text0"
+            ]
+        },
+        {
+            "bmp": "/bmp/example.bmp",
+            "title": "title1",
+            "text": [
+                "text0",
+                "text1"
+            ]
+        },
+        {
+            "bmp": "/bmp/example.bmp",
+            "title": "title2",
+            "text": [
+                "text0",
+                "text1",
+                "text2"
+            ]
+        }
+    ]
+}
