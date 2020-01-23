@@ -223,4 +223,4 @@ module cover()
 
 translate([0, 0, 0]) hull();
 translate([0, -hull_y-10, 0]) color("red", 1.0) cover();
-translate([0, hull_y, hull_z+1]) rotate([180, 0, 0]) color("red", 1.0) cover();
+// translate([0, hull_y, hull_z+1]) rotate([180, 0, 0]) color("red", 1.0) cover();
