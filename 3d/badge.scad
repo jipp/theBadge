@@ -4,7 +4,7 @@ tolerance = 0.99;
 
 hull_x = 90;
 hull_y = 45;
-hull_z = 10;
+hull_z = 11;
 
 module display()
 {
@@ -27,7 +27,7 @@ module button()
 {
     button_x = 4;
     button_y = 5.5;
-    thickness = 0.5;
+    thickness = 0.4;
     space = 0.6;
 
     difference()
@@ -88,11 +88,11 @@ module holder2()
 module letter()
 {
     translate([0, -t+t/3, t_z]) rotate([90, 0, 0]) linear_extrude(t/3) text(text="the badge", size=2.5);
-        translate([-t+t/3, 34, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="rst", size=2.5);
-        translate([-t+t/3, 25, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="1", size=2.5);
-        translate([-t+t/3, 16, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="2", size=2.5);
-        translate([-t+t/3, 7, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="3", size=2.5);
-
+    translate([19, -t+t/3, 0.75]) rotate([90, 0, 0]) linear_extrude(t/3) text(text="off / on", size=1.5);
+    translate([-t+t/3, 34, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="rst", size=2.5);
+    translate([-t+t/3, 25, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="1", size=2.5);
+    translate([-t+t/3, 16, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="2", size=2.5);
+    translate([-t+t/3, 7, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="3", size=2.5);   
 }
 
 module hull()
@@ -124,6 +124,11 @@ module hull()
         translate([switch_offset_x, -t, switch_offset_z]) switch();
         translate([sd_offset_x, -t, sd_offset_z]) sd();
         translate([usb_offset_x, hull_y, usb_offset_z]) usb();
+        
+        translate([(1-tolerance)/2*hull_x+3, -t, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+        translate([(1-tolerance)/2*hull_x+3, hull_y, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+        translate([65+3, -t, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+        translate([65+3, hull_y, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
 
         letter();
     }
@@ -153,7 +158,7 @@ module pinHole()
 
 module speakerHoles()
 {
-    radius = 0.4;
+    radius = 0.5;
     
     for (x =[-4, 0, 4])
     {
@@ -176,10 +181,14 @@ module separator()
 
 module latch()
 {
-    height = 6;
+    height = 5;
     width = 6;
     
-    cube([width, t, height]);
+    difference()
+    {
+        cube([width, t, height]);
+        translate([width/2, 0, height/2]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+    }
 }
 
 module cover()
@@ -210,11 +219,8 @@ module cover()
     translate([separator_offset,(1-tolerance)/2*hull_y, t]) latch();
     translate([(1-tolerance)/2*hull_x, (1-tolerance)/2*hull_y+hull_y*tolerance-t, t]) latch();
     translate([separator_offset, (1-tolerance)/2*hull_y+hull_y*tolerance-t, t]) latch();
-    
-    
-    
 }
 
 translate([0, 0, 0]) hull();
 translate([0, -hull_y-10, 0]) color("red", 1.0) cover();
-// translate([0, hull_y, hull_z+1]) rotate([180, 0, 0]) color("red", 1.0) cover();
+translate([0, hull_y, hull_z+1]) rotate([180, 0, 0]) color("red", 1.0) cover();
