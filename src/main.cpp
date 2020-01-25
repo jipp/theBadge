@@ -432,7 +432,7 @@ void handleNotFound()
 void startNetwork()
 {
   std::cout << "start Network" << std::endl;
-  WiFi.softAP("the badge");
+  WiFi.softAP("theBadge");
   dnsServer.start(53, "*", WiFi.softAPIP());
 
   webServer.onNotFound(handleNotFound);
