@@ -75,8 +75,9 @@ module usb()
 
 module holder1()
 {
-    cube([17.5, 1, 1]);
-    translate([45, 0, 0]) cube([14, 1, 1]);
+    cube([17.5, 1, 1]); //14
+    translate([45, 0, 0]) cube([5, 1, 1]);
+    translate([56, 0, 0]) cube([3, 1, 1]);
 }
 
 module holder2()
@@ -125,10 +126,10 @@ module hull()
         translate([sd_offset_x, -t, sd_offset_z]) sd();
         translate([usb_offset_x, hull_y, usb_offset_z]) usb();
         
-        translate([(1-tolerance)/2*hull_x+3, -t, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
-        translate([(1-tolerance)/2*hull_x+3, hull_y, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
-        translate([65+3, -t, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
-        translate([65+3, hull_y, 8.3]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+        translate([(1-tolerance)/2*hull_x+3, -t, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
+        translate([(1-tolerance)/2*hull_x+3, hull_y, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
+        translate([65+3, -t, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
+        translate([65+3, hull_y, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
 
         letter();
     }
@@ -181,13 +182,13 @@ module separator()
 
 module latch()
 {
-    height = 5;
+    height = 6;
     width = 6;
     
     difference()
     {
         cube([width, t, height]);
-        translate([width/2, 0, height/2]) rotate([270, 0, 0]) cylinder(h=t, d=2, $fn=36);
+        translate([width/2, 0, height/2]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
     }
 }
 
