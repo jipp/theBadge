@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-// TODO (jipp): upload info via web services
+// TODO (jipp): upload info via web services, list files, delete files, upload files
 
 #define ARDUINOJSON_ENABLE_STD_STRING 1
 #define ENABLE_GxEPD2_GFX 0
