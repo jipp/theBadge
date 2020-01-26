@@ -42,6 +42,10 @@ Ticker goToSleep = Ticker();
 
 const char *filename = "/config.json";
 
+const char Header[] PROGMEM = "HTTP/1.1 303 OK\r\nLocation:spiffs.html\r\nCache-Control: no-cache\r\n";
+const char Helper[] PROGMEM = R"(<form method="POST" action="/upload" enctype="multipart/form-data">
+     <input type="file" name="upload"><input type="submit" value="Upload"></form>Lade die spiffs.html hoch.)";
+
 static const uint16_t input_buffer_pixels = 800;      // may affect performance
 static const uint16_t max_row_width = 800;            // for up to 7.5" display 800x480
 static const uint16_t max_palette_pixels = 256;       // for depth <= 8
@@ -424,9 +428,113 @@ void switchScreen(DynamicJsonDocument &jsonDoc, int increment)
   displayScreen(jsonDoc, active + 1, total);
 }
 
-void handleNotFound()
+const String formatBytes(size_t const &bytes)
+{ // lesbare Anzeige der Speichergrößen
+  return (bytes < 1024) ? String(bytes) + " Byte" : (bytes < (1024 * 1024)) ? String(bytes / 1024.0) + " KB" : String(bytes / 1024.0 / 1024.0) + " MB";
+}
+
+const String &contentType(String &filename)
+{ // ermittelt den Content-Typ
+  if (filename.endsWith(".htm") || filename.endsWith(".html"))
+    filename = "text/html";
+  else if (filename.endsWith(".css"))
+    filename = "text/css";
+  else if (filename.endsWith(".js"))
+    filename = "application/javascript";
+  else if (filename.endsWith(".json"))
+    filename = "application/json";
+  else if (filename.endsWith(".png"))
+    filename = "image/png";
+  else if (filename.endsWith(".gif"))
+    filename = "image/gif";
+  else if (filename.endsWith(".jpg"))
+    filename = "image/jpeg";
+  else if (filename.endsWith(".ico"))
+    filename = "image/x-icon";
+  else if (filename.endsWith(".xml"))
+    filename = "text/xml";
+  else if (filename.endsWith(".pdf"))
+    filename = "application/x-pdf";
+  else if (filename.endsWith(".zip"))
+    filename = "application/x-zip";
+  else if (filename.endsWith(".gz"))
+    filename = "application/x-gzip";
+  else
+    filename = "text/plain";
+  return filename;
+}
+
+void handleList()
+{ // Senden aller Daten an den Client
+  File root = SPIFFS.open("/");
+  String temp = "[";
+  File file = root.openNextFile();
+  while (file)
+  {
+    if (temp != "[")
+      temp += ",";
+    temp += R"({"name":")" + String(file.name() + 1) + R"(","size":")" + formatBytes(file.size()) + R"("})";
+    file = root.openNextFile();
+  }
+  temp += R"(,{"usedBytes":")" + formatBytes(SPIFFS.usedBytes() * 1.05) + R"(",)" +       // Berechnet den verwendeten Speicherplatz + 5% Sicherheitsaufschlag
+          R"("totalBytes":")" + formatBytes(SPIFFS.totalBytes()) + R"(","freeBytes":")" + // Zeigt die Größe des Speichers
+          (SPIFFS.totalBytes() - (SPIFFS.usedBytes() * 1.05)) + R"("}])";                 // Berechnet den freien Speicherplatz + 5% Sicherheitsaufschlag
+  webServer.send(200, "application/json", temp);
+}
+
+bool handleFile(String &&path)
 {
-  webServer.send(404, "text/plain", "File Not Found");
+  if (webServer.hasArg("delete"))
+  {
+    SPIFFS.remove(webServer.arg("delete")); // Datei löschen
+    webServer.sendContent(Header);
+    return true;
+  }
+  if (!SPIFFS.exists("/spiffs.html"))
+    webServer.send(200, "text/html", Helper); //Upload the spiffs.html
+  if (path.endsWith("/"))
+    path += "index.html";
+  return SPIFFS.exists(path) ? ({File f = SPIFFS.open(path, "r"); webServer.streamFile(f, contentType(path)); f.close(); true; }) : false;
+}
+
+void handleFileUpload()
+{ // Dateien vom Rechnenknecht oder Klingelkasten ins SPIFFS schreiben
+  static File fsUploadFile;
+  HTTPUpload &upload = webServer.upload();
+  if (upload.status == UPLOAD_FILE_START)
+  {
+    if (upload.filename.length() > 30)
+    {
+      upload.filename = upload.filename.substring(upload.filename.length() - 30, upload.filename.length()); // Dateinamen auf 30 Zeichen kürzen
+    }
+    std::cout << "FileUpload Name: " << upload.filename << std::endl;
+    fsUploadFile = SPIFFS.open("/" + webServer.urlDecode(upload.filename), "w");
+  }
+  else if (upload.status == UPLOAD_FILE_WRITE)
+  {
+    std::cout << "FileUpload Data: " << (String)upload.currentSize << std::endl;
+    if (fsUploadFile)
+      fsUploadFile.write(upload.buf, upload.currentSize);
+  }
+  else if (upload.status == UPLOAD_FILE_END)
+  {
+    if (fsUploadFile)
+      fsUploadFile.close();
+    std::cout << "FileUpload Size: " << (String)upload.totalSize << std::endl;
+    webServer.sendContent(Header);
+  }
+}
+
+void formatSpiffs()
+{ //Formatiert den Speicher
+  SPIFFS.format();
+  webServer.sendContent(Header);
+}
+
+bool freeSpace(uint16_t const &printsize)
+{ // Funktion um beim speichern in Logdateien zu prüfen ob noch genügend freier Platz verfügbar ist.
+  std::cout << formatBytes(SPIFFS.totalBytes() - (SPIFFS.usedBytes() * 1.05)) << " im Spiffs frei" << std::endl;
+  return (SPIFFS.totalBytes() - (SPIFFS.usedBytes() * 1.05) > printsize) ? true : false;
 }
 
 void startNetwork()
@@ -435,8 +543,14 @@ void startNetwork()
   WiFi.softAP("theBadge");
   dnsServer.start(53, "*", WiFi.softAPIP());
 
-  webServer.onNotFound(handleNotFound);
-  webServer.serveStatic("/index.html", SPIFFS, "/www/index.html");
+  webServer.on("/json", handleList);
+  webServer.on("/format", formatSpiffs);
+  webServer.on("/upload", HTTP_POST, []() {}, handleFileUpload);
+  webServer.onNotFound([]() {
+    if (!handleFile(webServer.urlDecode(webServer.uri())))
+      webServer.send(404, "text/plain", "FileNotFound");
+  });
+
   webServer.begin();
 }
 

@@ -1,0 +1,64 @@
+<!-- For more information visit: https://fipsok.de -->
+<!DOCTYPE HTML>
+<html lang="de">
+   <head>
+      <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="style32.css">
+      <title>Esp32 Datei Manager</title>
+      <script>
+         document.addEventListener('DOMContentLoaded', () => {
+		   let span = document.querySelector('span');
+           let main = document.querySelector('main');
+		   let elem = document.querySelectorAll('input');
+           fetch('json').then(function (response) {
+             return response.json();
+           }).then(function (json) {
+             for (var i = 0; i < json.length - 1; i++) {
+               let dir = `<li><a href ="${json[i].name}">${json[i].name}</a><small> ${json[i].size}</small>`;
+			   dir += `<a href ="${json[i].name}"download="${json[i].name}"> Download </a>or <a href ="${json[i].name}?delete=/${json[i].name}">Delete </a>`;
+               main.insertAdjacentHTML('beforeend', dir);
+             }
+             main.insertAdjacentHTML('beforeend', `<li><b>SPIFFS</b> belegt ${json[i].usedBytes} von ${json[i].totalBytes}`);
+			 document.querySelectorAll('a:last-child').forEach((node) => {
+			   node.addEventListener('click', () => {
+	             if (!confirm('Bist du sicher!')) event.preventDefault();
+	           });
+		     });
+			 free = json[i].freeBytes;
+           });
+		   elem[0].addEventListener('change', () => {
+			 let nBytes = elem[0].files[0].size, output = `${nBytes} Byte`;
+             for (var aMultiples = [
+               ' KB',
+               ' MB'
+               ], i = 0, nApprox = nBytes / 1024; nApprox > 1; nApprox /= 1024, i++) {
+               output = nApprox.toFixed(2) + aMultiples[i];
+             }
+             if (nBytes > free) {
+               span.innerHTML = `<li><small> Dateigröße: ${output}</small><strong style="color: red;"> Ungenügend Speicher frei </strong></li>`;
+               elem[1].setAttribute('disabled', 'disabled');
+             } 
+             else {
+               span.innerHTML = `<li><b>Dateigröße:</b> ${output}</li>`;
+               elem[1].removeAttribute('disabled');
+             }
+		   });
+		   elem[2].addEventListener('click', () => {
+	         if (!confirm(`Wirklich formatieren? Alle Daten gehen verloren.\nDu musst anschließend spiffs.html wieder laden.`)) event.preventDefault();
+	       }); 
+         });
+      </script>
+   </head>
+   <body>
+      <h2>ESP32 Datei Manager</h2>
+      <form action="/upload" method="POST" enctype="multipart/form-data"><input type="file" name="upload">
+         <input type="submit" value="Upload" disabled>
+      </form>
+      <div>
+         <span></span>
+         <main></main>
+      </div>
+      <form action="/format" method="POST"><input type="submit" value="Format SPIFFS"></form>
+   </body>
+</html>
