@@ -6,6 +6,8 @@ hull_x = 90;
 hull_y = 45;
 hull_z = 11;
 
+$fn=36;
+
 module display()
 {
     display_x = 80;
@@ -90,7 +92,7 @@ module letter()
 {
     translate([0, -t+t/3, t_z]) rotate([90, 0, 0]) linear_extrude(t/3) text(text="the badge", size=2.5);
     translate([19, -t+t/3, 0.75]) rotate([90, 0, 0]) linear_extrude(t/3) text(text="off / on", size=1.5);
-    translate([-t+t/3, 34, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="rst", size=2.5);
+    translate([-t+t/3, 34, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="reset", size=2.5);
     translate([-t+t/3, 25, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="1", size=2.5);
     translate([-t+t/3, 16, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="2", size=2.5);
     translate([-t+t/3, 7, t_z]) rotate([270, 270, 90]) linear_extrude(t/3) text(text="3", size=2.5);   
@@ -115,7 +117,7 @@ module hull()
         minkowski()
         {
             cube([hull_x, hull_y, hull_z-1]);
-            cylinder(r=t, h=1, $fn=36);
+            cylinder(r=t, h=1);
         }
     
         translate([0, 0, t_z]) cube([hull_x, hull_y, hull_z-t_z]);
@@ -126,10 +128,10 @@ module hull()
         translate([sd_offset_x, -t, sd_offset_z]) sd();
         translate([usb_offset_x, hull_y, usb_offset_z]) usb();
         
-        translate([(1-tolerance)/2*hull_x+3, -t, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
-        translate([(1-tolerance)/2*hull_x+3, hull_y, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
-        translate([65+3, -t, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
-        translate([65+3, hull_y, 7.8]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
+        translate([(1-tolerance)/2*hull_x+3, -t, 6.8]) rotate([270, 0, 0]) cylinder(h=t, d=3);
+        translate([(1-tolerance)/2*hull_x+3, hull_y, 6.8]) rotate([270, 0, 0]) cylinder(h=t, d=3);
+        translate([65+3, -t, 6.8]) rotate([270, 0, 0]) cylinder(h=t, d=3);
+        translate([65+3, hull_y,6.8]) rotate([270, 0, 0]) cylinder(h=t, d=3);
 
         letter();
     }
@@ -165,12 +167,12 @@ module speakerHoles()
     {
         for (y = [-4, 0, 4])
         {
-            translate([-radius*x, -radius*y, 0]) cylinder(h=t, r=radius, $fn=36);
+            translate([-radius*x, -radius*y, 0]) cylinder(h=t, r=radius);
         }
     }
     
-    translate([-2*radius*4, 0, 0]) cylinder(h=t, r=radius, $fn=36);
-    translate([2*radius*4, 0, 0]) cylinder(h=t, r=radius, $fn=36);
+    translate([-2*radius*4, 0, 0]) cylinder(h=t, r=radius);
+    translate([2*radius*4, 0, 0]) cylinder(h=t, r=radius);
 }
 
 module separator()
@@ -184,11 +186,13 @@ module latch()
 {
     height = 6;
     width = 6;
+    diameter = 3;
     
-    difference()
+    cube([width, t, height]);
+    translate([width/2, 0, 4]) rotate([90, 0, 0]) difference()
     {
-        cube([width, t, height]);
-        translate([width/2, 0, height/2]) rotate([270, 0, 0]) cylinder(h=t, d=3, $fn=36);
+        scale ([1, 1, 0.3]) sphere(d=diameter);
+        translate([0, 0, -diameter]) cube(2*diameter, center= true); 
     }
 }
 
@@ -207,7 +211,7 @@ module cover()
         minkowski()
         {
             cube([hull_x, hull_y, t-1]);
-            cylinder(r=t, h=1, $fn=36);
+            cylinder(r=t, h=1);
         }
     
         translate([pinHole_x, pinHole_y, ]) pinHole();
@@ -216,10 +220,11 @@ module cover()
     
     translate([(1-tolerance)/2*hull_x,(1-tolerance)/2*hull_y, t]) border();
     translate([separator_offset, (1-tolerance)/2*hull_y, t]) separator();
+    
     translate([(1-tolerance)/2*hull_x,(1-tolerance)/2*hull_y, t]) latch();
     translate([separator_offset,(1-tolerance)/2*hull_y, t]) latch();
-    translate([(1-tolerance)/2*hull_x, (1-tolerance)/2*hull_y+hull_y*tolerance-t, t]) latch();
-    translate([separator_offset, (1-tolerance)/2*hull_y+hull_y*tolerance-t, t]) latch();
+    translate([(1-tolerance)/2*hull_x+6, (1-tolerance)/2*hull_y+hull_y*tolerance, t]) rotate([0, 0, 180]) latch();
+    translate([separator_offset+6, (1-tolerance)/2*hull_y+hull_y*tolerance, t]) rotate([0, 0, 180]) latch();
 }
 
 translate([0, 0, 0]) hull();

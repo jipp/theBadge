@@ -3,7 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-3d/*.stl
-3d/*.gcode
+3dPrinter/*.stl
+3dPrinter/*.gcode
 data/bmp/*.bmp
 config.json
