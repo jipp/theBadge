@@ -6,7 +6,8 @@ gauge = 1.2;
 gauge_z = 2;
 tolerance = 0.99;
 
-$fn=36;
+$fn = 36;
+// $fn = 76;
 
 module display()
 {
@@ -42,7 +43,7 @@ module button()
             }
         }
         
-        for (y =[0, 9, 18])
+        for (y =[0, 9, 18, 27])
         {
             translate([0, y+space, 0]) cube([button_x-space, button_y-2*space, thickness]);
         }
@@ -128,10 +129,10 @@ module hull()
         translate([sd_offset_x, -gauge, sd_offset_z]) sd();
         translate([usb_offset_x, hull_y, usb_offset_z]) usb();
         
-        translate([(1-tolerance)/2*hull_x+3, -gauge, 6.8]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
-        translate([(1-tolerance)/2*hull_x+3, hull_y, 6.8]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
-        translate([65+3, -gauge, 6.8]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
-        translate([65+3, hull_y, 6.8]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
+        translate([(1-tolerance)/2*hull_x+3, -gauge, 7]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
+        translate([(1-tolerance)/2*hull_x+3, hull_y, 7]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
+        translate([65+3, -gauge, 7]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
+        translate([65+3, hull_y, 7]) rotate([270, 0, 0]) cylinder(h=gauge, d=3);
 
         letter();
     }
@@ -193,7 +194,7 @@ module latch()
     translate([width/2, 0, 4]) rotate([90, 0, 0]) difference()
     {
         scale ([1, 1, 0.5]) sphere(d=diameter);
-        translate([0, 0, -diameter]) cube(2*diameter, center= true); 
+        translate([0, 0, -diameter]) cube(2*diameter, center=true); 
     }
 }
 
@@ -231,4 +232,4 @@ module cover()
 
 translate([0, 0, 0]) hull();
 translate([0, -hull_y-10, 0]) color("red", 1.0) cover();
-// translate([0, hull_y, hull_z+1]) rotate([180, 0, 0]) color("red", 1.0) cover();
+// translate([0, hull_y, hull_z+gauge]) rotate([180, 0, 0]) color("red", 1.0) cover();
