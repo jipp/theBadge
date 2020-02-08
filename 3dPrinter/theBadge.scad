@@ -204,7 +204,7 @@ module cover()
     pinHole_y = 4;
     
     speaker_x = 45;
-    speaker_y = 22;
+    speaker_y = 30;
 
     separator_offset = 65;
     
