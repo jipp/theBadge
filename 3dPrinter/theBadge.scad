@@ -179,19 +179,19 @@ module speakerHoles()
 
 module separator()
 {
-    height = 4;
+    height = 3;
     
     cube([gauge, hull_y*tolerance, height]);
 }
 
 module latch()
 {
-    height = 6;
+    height = hull_z - 5;
     width = 6;
     diameter = 3;
     
     cube([width, gauge, height]);
-    translate([width/2, 0, 4]) rotate([90, 0, 0]) difference()
+    translate([width/2, 0, hull_z - 7]) rotate([90, 0, 0]) difference()
     {
         scale ([1, 1, 0.5]) sphere(d=diameter);
         translate([0, 0, -diameter]) cube(2*diameter, center=true); 
